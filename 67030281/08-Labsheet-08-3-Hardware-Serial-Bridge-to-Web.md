@@ -1,4 +1,4 @@
-# ใบงานการทดลองที่ 8.3 (Labsheet 8.3) - ฉบับบันทึกผลและตอบคำถาม
+# ใบงานการทดลองที่ 8.3 (Labsheet 8.3)
 ### สะพานเชื่อมฮาร์ดแวร์จริงสู่เว็บเซิร์ฟเวอร์ (Hardware Serial Bridge)
 
 **รหัสนักศึกษา:** 67030281  
@@ -11,11 +11,11 @@
 2. สามารถสร้างและกำหนดค่า `BackgroundService` เพื่อทำงานดักรับข้อมูลแบบ Non-blocking เธรดเบื้องหลังได้
 3. เข้าใจการสร้างคลาสเก็บสถานะข้อมูลแบบปลอดภัยต่อการเข้าถึงพร้อมกัน (Thread-Safe Shared State)
 4. สามารถเชื่อมโยงข้อมูลจากสาย USB สู่ Web Endpoint `/api/telemetry` ได้อย่างสมบูรณ์
-5. สัมผัสความมหัศจรรย์ของ **Dual-Mode System**: ระบบสลับสู่โหมดจำลอง (Simulator) อัตโนมัติเมื่อถอดสาย
+5. ทดสอบการทำงานของ Dual-Mode System: ระบบสลับสู่โหมดจำลอง (Simulator) อัตโนมัติเมื่อถอดสาย
 
 ---
 
-## การออกแบบสถาปัตยกรรมระบบ (System Architecture)
+## แผนภาพการทำงานของระบบ (System Architecture)
 
 ```mermaid
 flowchart LR
@@ -28,21 +28,17 @@ flowchart LR
 
 ---
 
-## โครงสร้างซอร์สโค้ดฉบับสมบูรณ์ (`Lab8-3/Kestrel_Serial_Gateway/Program.cs`)
+## โครงสร้างซอร์สโค้ด (`Lab8-3/Kestrel_Serial_Gateway/Program.cs`)
 
 ```csharp
-// ==============================================================================
-// Project: Kestrel Serial Gateway & Telemetry Bridge (Lab 8-3)
-// Student: Chanin Khamwongsa (ชนินทร์ คำวงศ์ษา) | ID: 67030281
-// ==============================================================================
 using System.IO.Ports;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ลงทะเบียน StateStore เป็น Singleton (มีอินสแตนซ์เดียวตลอดอายุการทำงานของเว็บเซิร์ฟเวอร์)
+// ลงทะเบียน TelemetryStateStore เป็น Singleton (มี Instance เดียวตลอดการทำงาน)
 builder.Services.AddSingleton<TelemetryStateStore>();
 
-// ลงทะเบียน SerialBridgeWorker เป็น Background Hosted Service ทำงานแบบเบื้องหลัง
+// ลงทะเบียน SerialBridgeWorker เป็น Background Hosted Service
 builder.Services.AddHostedService<SerialBridgeWorker>();
 
 var app = builder.Build();
@@ -50,7 +46,7 @@ var app = builder.Build();
 // Endpoint หน้าแรก
 app.MapGet("/", () => "IoT Edge Gateway Online! Visit /api/telemetry to view live data.");
 
-// Endpoint ดึงข้อมูลโทรมาตรล่าสุด พร้อมการคำนวณ Alert Level ตามภารกิจท้าทาย
+// Endpoint สำหรับดึงค่า Telemetry ล่าสุด (พร้อม Micro-Challenge: alertLevel)
 app.MapGet("/api/telemetry", (TelemetryStateStore state) => {
     var (raw, voltage, percent, source, updated) = state.GetSnapshot();
     
@@ -107,7 +103,7 @@ public class TelemetryStateStore
 }
 
 // ============================================================================
-// 2. BACKGROUND WORKER (ดักฟังข้อมูลจาก Serial พร้อมโหมดจำลองคลื่นไซน์)
+// 2. BACKGROUND WORKER (อ่านข้อมูล Serial จาก ESP32 พร้อม Fallback Simulation)
 // ============================================================================
 public class SerialBridgeWorker : BackgroundService
 {
@@ -181,7 +177,7 @@ public class SerialBridgeWorker : BackgroundService
                 _logger.LogInformation("🔍 ไม่พบพอร์ต USB -> ทำงานในโหมดจำลอง (Simulation Mode)");
             }
 
-            // Fallback Simulation Mode (คลื่น Sine Wave อัตโนมัติ)
+            // Fallback Simulation Mode (คลื่น Sine Wave)
             for (int i = 0; i < 20 && !stoppingToken.IsCancellationRequested; i++)
             {
                 double t = Environment.TickCount64 / 1000.0;
@@ -204,24 +200,22 @@ public class SerialBridgeWorker : BackgroundService
 
 ### ผลการสังเกตและตอบคำถาม:
 1. **ค่า `dataSource` เปลี่ยนเป็นอะไร?**
-   - **คำตอบ:** เปลี่ยนจาก `"Live Hardware (COMx)"` เป็น **`"Simulation Mode (Sine Wave)"`**
+   - **คำตอบ:** เปลี่ยนจาก `"Live Hardware (COM24)"` กลายเป็น **`"Simulation Mode (Sine Wave)"`** ครับ
 2. **ค่า `rawValue` ยังเปลี่ยนได้อยู่หรือไม่ และเปลี่ยนในลักษณะใด?**
-   - **คำตอบ:** **ยังคงเปลี่ยนแปลงได้อย่างต่อเนื่อง** โดยค่าไม่ได้หยุดนิ่งหรือกลายเป็นศูนย์ แต่ค่า `rawValue` จะเปลี่ยนแปลงในลักษณะ **การแกว่งตัวขึ้นลงอย่างนุ่มนวลเป็นคลื่นรูปไซน์ (Sine Wave Oscillation)** อยู่ในช่วงระหว่าง `0` ถึง `4095` ตามสมการคณิตศาสตร์:
-     $$\text{simAdc} = \left(\frac{\sin(1.5 \times t) + 1.0}{2.0}\right) \times 4095$$
-   - **ความสำคัญในเชิงระบบอุตสาหกรรม:** กลไกนี้เรียกว่า **Fault-Tolerant Fallback System** ซึ่งช่วยให้ทีมผู้พัฒนาฝั่ง Frontend, แดชบอร์ด หรือระบบตรวจสอบ สามารถทดสอบและแสดงผลหน้าจอได้อย่างราบรื่นโดยไม่ล่ม (Graceful Degradation) แม้ในช่วงเวลาที่อุปกรณ์ฮาร์ดแวร์จริงไม่ได้เชื่อมต่ออยู่
+   - **คำตอบ:** ยังเปลี่ยนได้อยู่เรื่อยๆ ครับ โดยค่ามันจะไม่ได้ค้างหรือกลายเป็นศูนย์ แต่จะแกว่งขึ้นๆ ลงๆ เป็นลูกคลื่น Sine Wave วิ่งสลับไปมาระหว่าง 0 ถึง 4095 ไปเรื่อยๆ ครับ เพราะในโค้ดมีระบบ Fallback ช่วยจำลองค่าให้ ทำให้หน้าเว็บหรือโปรแกรมที่มารับข้อยังทำงานต่อได้แบบไม่ล่ม แม้ว่าเราจะถอดสายบอร์ดออกไปแล้วครับ
 
 ---
 
 ## 🎯 ภารกิจท้าทาย (Micro-Challenge) การเพิ่มฟิลด์ `alertLevel`
 
-### 1. เงื่อนไขและตรรกะการทำงาน (Logic)
-- เมื่อ $\text{percentage} > 85.0\%$ $\rightarrow$ `"DANGER (HIGH)"`
-- เมื่อ $70.0\% \le \text{percentage} \le 85.0\%$ $\rightarrow$ `"WARNING"`
-- เมื่อ $\text{percentage} < 70.0\%$ $\rightarrow$ `"NORMAL"`
+### 1. เงื่อนไขการทำงาน
+- เมื่อ percentage > 85.0% กำหนดเป็น `"DANGER (HIGH)"`
+- เมื่อ percentage อยู่ระหว่าง 70.0% ถึง 85.0% กำหนดเป็น `"WARNING"`
+- เมื่อ percentage ต่ำกว่า 70.0% กำหนดเป็น `"NORMAL"`
 
 ### 2. ผลลัพธ์ JSON ในแต่ละระดับการทดสอบ
 
-#### กรณีที่ 1: ระดับปกติ (NORMAL: หมุน Volume ต่ำกว่า 70%)
+#### กรณีที่ 1: ระดับปกติ (NORMAL: ค่าต่ำกว่า 70%)
 ```json
 {
   "sensor": "ESP32-Potentiometer",
@@ -234,7 +228,7 @@ public class SerialBridgeWorker : BackgroundService
 }
 ```
 
-#### กรณีที่ 2: ระดับเตือนภัย (WARNING: หมุน Volume ระหว่าง 70% ถึง 85%)
+#### กรณีที่ 2: ระดับเตือนภัย (WARNING: ค่าระหว่าง 70% ถึง 85%)
 ```json
 {
   "sensor": "ESP32-Potentiometer",
@@ -247,7 +241,7 @@ public class SerialBridgeWorker : BackgroundService
 }
 ```
 
-#### กรณีที่ 3: ระดับอันตรายวิกฤต (DANGER (HIGH): หมุน Volume เกิน 85%)
+#### กรณีที่ 3: ระดับอันตราย (DANGER (HIGH): ค่าเกิน 85%)
 ```json
 {
   "sensor": "ESP32-Potentiometer",
@@ -259,4 +253,3 @@ public class SerialBridgeWorker : BackgroundService
   "timestamp": "2026-11-05T20:50:35.789Z"
 }
 ```
-

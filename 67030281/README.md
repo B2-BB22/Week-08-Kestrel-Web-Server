@@ -1,90 +1,80 @@
-# เอกสารสรุปใบงานคำตอบประจำสัปดาห์ที่ 8 (Week 08 Lab Submission)
-## Kestrel Web Server & Minimal API Fundamentals
+# สรุปการส่งงาน Week 08: Kestrel Web Server & Minimal API
+
+### ข้อมูลนักศึกษา
+- **รหัสนักศึกษา:** 67030281
+- **ชื่อ-นามสกุล:** นายชนินทร์ คำวงศ์ษา
+- **วิชา:** Application of Internet of Things (สัปดาห์ที่ 8)
 
 ---
 
-### 👤 ข้อมูลประจำตัวนักศึกษา
-- **รหัสนักศึกษา:** `67030281`
-- **ชื่อ-นามสกุล:** นายชนินทร์ คำวงศ์ษา (Chanin Khamwongsa)
-- **คณะ:** คณะวิศวกรรมศาสตร์
-- **สาขาวิชา:** วิศวกรรมคอมพิวเตอร์ (Computer Engineering)
-- **วิชา:** Application of Internet of Things (Week 08)
+## รายการใบงานที่ส่งในโฟลเดอร์ `67030281`
 
----
-
-## 📑 รายการใบงานคำตอบ (Labsheets) ในโฟลเดอร์ `67030281`
-
-ในโฟลเดอร์นี้รวบรวมเฉพาะใบงานที่มีการตอบคำถาม (Checkpoints, Review Questions และ Micro-Challenges) ครบถ้วน 100%:
-
-| ลำดับใบงาน | ชื่อเอกสารใบงาน (Labsheet) | หัวข้อการทดลอง | สถานะคำตอบ |
+| ใบงาน | ไฟล์เอกสารใบงาน | เนื้อหาการทดลอง | สถานะ |
 | :---: | :--- | :--- | :---: |
-| **Lab 8.1** | [06-Labsheet-08-1-Kestrel-Minimal-API-Fundamentals.md](06-Labsheet-08-1-Kestrel-Minimal-API-Fundamentals.md) | พื้นฐาน Kestrel Web Server, Minimal API, JSON Serialization, Checkpoint 1.1, คำถามท้ายบท 3 ข้อ และ Micro-Challenge `/api/student` | ✅ ตอบครบถ้วน 100% |
-| **Lab 8.2** | [07-Labsheet-08-2-ESP32-ADC-and-Serial-Stream.md](07-Labsheet-08-2-ESP32-ADC-and-Serial-Stream.md) | การสตรีมสัญญาณ ADC 12-bit (GPIO 34) ออก UART @ 115200 bps ด้วย ESP-IDF v6.x, ฟิลเตอร์ EMA และ Checkpoint 2.1 | ✅ ตอบครบถ้วน 100% |
-| **Lab 8.3** | [08-Labsheet-08-3-Hardware-Serial-Bridge-to-Web.md](08-Labsheet-08-3-Hardware-Serial-Bridge-to-Web.md) | สะพานเชื่อม USB Serial Bridge สู่ Kestrel ด้วย `BackgroundService`, Thread-Safe State, Checkpoint 3.1 และ Micro-Challenge `alertLevel` | ✅ ตอบครบถ้วน 100% |
-
-> 📌 **หมายเหตุ:** ใบงาน Lab 8-4 และ Lab 8-5 ที่มีข้อกำหนดการบันทึกคลิปวิดีโอ ได้ถูกนำออกจากโฟลเดอร์คำตอบ `67030281` นี้ตามคำสั่ง แต่ตัวซอร์สโค้ดและใบงานต้นฉบับยังคงถูกจัดเก็บรักษาไว้ที่โฟลเดอร์หลัก (Root Workspace) ของโปรเจกต์อย่างสมบูรณ์
+| **Lab 8.1** | [06-Labsheet-08-1-Kestrel-Minimal-API-Fundamentals.md](06-Labsheet-08-1-Kestrel-Minimal-API-Fundamentals.md) | พื้นฐาน Kestrel Web Server, Minimal API, JSON Serialization, Checkpoint 1.1, Review Questions และ Micro-Challenge `/api/student` | เรียบร้อย |
+| **Lab 8.2** | [07-Labsheet-08-2-ESP32-ADC-and-Serial-Stream.md](07-Labsheet-08-2-ESP32-ADC-and-Serial-Stream.md) | ESP32 ADC 12-bit (GPIO 34), สตรีมข้อมูล UART 115200 bps ด้วย ESP-IDF, EMA Filter และ Checkpoint 2.1 | เรียบร้อย |
+| **Lab 8.3** | [08-Labsheet-08-3-Hardware-Serial-Bridge-to-Web.md](08-Labsheet-08-3-Hardware-Serial-Bridge-to-Web.md) | Serial Bridge ด้วย BackgroundService บน Kestrel, Thread-Safe State, Checkpoint 3.1 และ Micro-Challenge `alertLevel` | เรียบร้อย |
 
 ---
 
-## 🌐 สรุปตาราง REST API Endpoints ของระบบ
+## สรุป REST API Endpoints ของระบบ
 
-| โปรเจกต์ | Method | Path | คำอธิบายและข้อมูลที่คืนค่า |
+| โปรเจกต์ | Method | Path | การทำงาน / ข้อมูลที่คืนค่า |
 | :--- | :---: | :--- | :--- |
-| **Lab 8-1** | `GET` | `/` | ข้อความต้อนรับระบุชื่อนักศึกษาและรหัส `67030281` |
-| **Lab 8-1** | `GET` | `/api/status` | สถานะของ Gateway, Uptime และ Health check |
-| **Lab 8-1** | `GET` | `/api/led/{state}` | รับพารามิเตอร์ `on`/`off` สั่งงานอุปกรณ์จำลองและแสดงผลบน Console |
-| **Lab 8-1** | `GET` | `/api/student` | **(Micro-Challenge)** ข้อมูลประจำตัวนักศึกษา ชนินทร์ คำวงศ์ษา รหัส `67030281` |
-| **Lab 8-3** | `GET` | `/api/telemetry` | ข้อมูลโทรมาตรเซนเซอร์ (`rawValue`, `voltage`, `percentage`, `alertLevel`, `dataSource`) |
+| **Lab 8-1** | `GET` | `/` | ข้อความต้อนรับระบุชื่อนักศึกษาและรหัส 67030281 |
+| **Lab 8-1** | `GET` | `/api/status` | ข้อมูลสถานะ Gateway, Uptime และ Health check |
+| **Lab 8-1** | `GET` | `/api/led/{state}` | รับพารามิเตอร์ `on` หรือ `off` จำลองการสั่งงานอุปกรณ์ |
+| **Lab 8-1** | `GET` | `/api/student` | (Micro-Challenge) ข้อมูลนักศึกษาและเซนเซอร์ที่สนใจ |
+| **Lab 8-3** | `GET` | `/api/telemetry` | ข้อมูลเซนเซอร์ล่าสุด (`rawValue`, `voltage`, `percentage`, `alertLevel`, `dataSource`) |
 
 ---
 
-## 💡 สรุปคำตอบสำคัญในใบงาน
+## สรุปคำตอบ Checkpoint และ Challenge
 
-### 1. Lab 8.1 - พื้นฐาน Kestrel Web Server
-- **Checkpoint 1.1:** เมื่อกด `Ctrl + C` แล้วกด Refresh หน้าเว็บจะขึ้น `ERR_CONNECTION_REFUSED` เพราะ Kestrel เป็น In-Process Server เมื่อโปรเซสหยุดทำงาน TCP Socket Listener จะปิดตัวลง ทำให้ไม่มีเซอร์วิสรับคำขอ HTTP
-- **คำถามข้อ 1 (builder vs app):**
-  - `builder`: จัดการ Configuration, โหลดการตั้งค่า และลงทะเบียน Service ใน DI Container
-  - `app`: จัดการ Middleware Pipeline, Routing Endpoint (`MapGet`) และสั่งรันเซิร์ฟเวอร์เปิดรับฟัง Request (`Run`)
+### Lab 8.1
+- **Checkpoint 1.1:** พอเรากด `Ctrl + C` แล้วไปกด Refresh หน้าเว็บจะขึ้น `ERR_CONNECTION_REFUSED` เพราะ Kestrel มันรันอยู่ในตัวโปรแกรมเลย พอสั่งหยุด โปรเซสก็ดับและพอร์ต 5000 ก็ปิดตามไปด้วย ทำให้ไม่มีเซิร์ฟเวอร์มารับ Request ครับ
+- **คำถามข้อ 1 (`builder` vs `app`):**
+  - `builder`: ใช้เตรียมของและตั้งค่าคอนฟิกต่างๆ ก่อนเริ่ม เช่น โหลดไฟล์การตั้งค่า และลงทะเบียน Services เข้า DI Container
+  - `app`: ตัวเว็บแอปที่สร้างเสร็จแล้ว เอาไว้คุม Middleware, กำหนดพวก Route Endpoint (`MapGet`) และสั่งรันเซิร์ฟเวอร์ด้วย `Run()`
 - **คำถามข้อ 2 (Minimal API vs LAMP):**
-  - Minimal API บน Kestrel เป็น Single Binary ทำงานแบบ Non-blocking I/O ประสิทธิภาพสูงมาก สามารถรัน `BackgroundService` ถือพอร์ต Serial และแชร์ Thread-Safe State ใน RAM ได้โดยตรง
-  - PHP บน LAMP มีรอบการทำงานแบบ Stateless ตัดจบในแต่ละคำขอ ไม่สามารถเปิด Serial Port ค้างไว้ในหน่วยความจำได้โดยตรง
-- **คำถามข้อ 3 (ประโยชน์ของ `/api/`):** แยกแยะ API Service ออกจาก Static Files ป้องกัน Route Collision และช่วยให้ Reverse Proxy / Load Balancer กรองเส้นทางได้ง่าย
-- **Micro-Challenge `/api/student`:** คืนค่า JSON ระบุรหัส `67030281`, ชื่อ `Chanin Khamwongsa`, คณะวิศวกรรมศาสตร์, เซนเซอร์ที่สนใจ และ Timestamp
+  - Minimal API บน Kestrel เป็นโปรแกรมเดียวจบ สามารถรัน BackgroundService เปิดพอร์ต Serial ค้างไว้ในแรมแล้วส่งให้ API ได้ทันทีแบบ real-time ทำงานเร็วและไม่กินสเปกเครื่อง
+  - LAMP (PHP) ทำงานแบบขอมาตอบไปแล้วเคลียร์แรมทิ้ง (Stateless) ทำให้เปิดพอร์ต Serial ค้างไว้ในแรมไม่ได้ ถ้าจะทำต้องเขียนระบบอื่นมารับค่าช่วยซึ่งยุ่งยากกว่ามาก
+- **คำถามข้อ 3 (ประโยชน์ของ `/api/`):** ช่วยแยกทางให้ชัดเจนระหว่าง API ข้อมูลดิบกับหน้าเว็บทั่วไป ป้องกันชื่อไปชนกับไฟล์เว็บ และช่วยให้ตั้งค่า Reverse Proxy ได้ง่ายครับ
+- **Micro-Challenge `/api/student`:** คืนค่า JSON รหัส 67030281, ชื่อ Chanin Khamwongsa, คณะวิศวกรรมศาสตร์, เซนเซอร์ที่สนใจ และเวลาเซิร์ฟเวอร์
 
-### 2. Lab 8.2 - ESP32 ADC & Serial Stream
-- **Checkpoint 2.1 (ข้อ 1):** ฟังก์ชัน `adc_oneshot_read()` คืนค่าเป็นตัวเลขจำนวนเต็ม 12 บิต ในช่วง **`0 ถึง 4095`** ($2^{12} - 1$)
-- **Checkpoint 2.1 (ข้อ 2):** ต้องกด `Ctrl + ]` ออกจาก `idf.py monitor` เพื่อปลดปล่อย Handle ของพอร์ต COM คืนแก่ระบบปฏิบัติการ มิฉะนั้นโปรแกรม C# Kestrel จะเปิดพอร์ตไม่ได้เนื่องจากติดสถานะ Exclusive Access
-- **Micro-Challenge LDR:** วงจรแบ่งแรงดัน (Voltage Divider) เมื่อส่องไฟ ความต้านทาน LDR ลดลง แรงดันเพิ่มขึ้น ค่า ADC พุ่งสูงขึ้นเข้าใกล้ 4095 เมื่อบังแสง ค่า ADC ลดต่ำลงเข้าใกล้ 0
+### Lab 8.2
+- **Checkpoint 2.1 (ข้อ 1):** ฟังก์ชัน `adc_oneshot_read()` คืนค่าเป็นตัวเลขจำนวนเต็ม (int) ในช่วง 0 ถึง 4095 ตามความละเอียด 12 บิต
+- **Checkpoint 2.1 (ข้อ 2):** ต้องกด `Ctrl + ]` ออกจากตัว monitor ก่อน เพื่อปล่อยพอร์ต COM คืนให้ระบบ ไม่อย่างนั้นโปรแกรม C# Kestrel จะเปิดพอร์ตไม่ได้เพราะพอร์ตถูกล็อกไว้ (Exclusive Access)
+- **Micro-Challenge LDR:** เมื่อต่อวงจรแบ่งแรงดัน ตอนเอาไฟส่อง ความต้านทาน LDR จะลดลง ทำให้แรงดันสูงขึ้น ค่า ADC พุ่งไปใกล้ 4095 พอเอามือบังแสง ความต้านทานจะสูงขึ้น ทำให้แรงดันลดลง ค่า ADC ดิ่งลงมาใกล้ 0
 
-### 3. Lab 8.3 - Hardware Serial Bridge
-- **Checkpoint 3.1:** เมื่อถอดสาย USB ค่า `dataSource` เปลี่ยนเป็น `"Simulation Mode (Sine Wave)"` อัตโนมัติ โดยค่า `rawValue` ยังคงแกว่งตัวขึ้น-ลงตามคลื่นไซน์อย่างต่อเนื่อง (Fault-Tolerant Fallback)
-- **Micro-Challenge `alertLevel`:** เพิ่มฟิลด์ตรวจสอบระดับเตือนภัย:
-  - $\text{percentage} > 85.0\% \rightarrow \textbf{"DANGER (HIGH)"}$
-  - $70.0\% \le \text{percentage} \le 85.0\% \rightarrow \textbf{"WARNING"}$
-  - $\text{percentage} < 70.0\% \rightarrow \textbf{"NORMAL"}$
+### Lab 8.3
+- **Checkpoint 3.1:** พอถอดสาย USB ค่า `dataSource` จะสลับไปเป็น `"Simulation Mode (Sine Wave)"` ทันที และค่า `rawValue` จะแกว่งขึ้นลงตามลูกคลื่นไซน์เรื่อยๆ อัตโนมัติ เพื่อจำลองข้อมูลเซนเซอร์ทำให้ระบบไม่ล่มแม้ไม่มีฮาร์ดแวร์ต่ออยู่
+- **Micro-Challenge `alertLevel`:** เพิ่มฟิลด์ตรวจสอบระดับแจ้งเตือน:
+  - percentage > 85.0% -> "DANGER (HIGH)"
+  - 70.0% ถึง 85.0% -> "WARNING"
+  - ต่ำกว่า 70.0% -> "NORMAL"
 
 ---
 
-## 🚀 วิธีการคอมไพล์และทดสอบรัน
+## ขั้นตอนการทดสอบรันแต่ละแล็บ
 
-### การรัน Lab 8-1 (Minimal API Fundamentals)
+### Lab 8-1
 ```powershell
 cd Lab8-1
 dotnet run
-# เปิดเบราว์เซอร์ที่: http://localhost:5000/api/student
+# เข้าทดสอบที่: http://localhost:5000/api/student
 ```
 
-### การรัน Lab 8-2 (ESP32 ADC Stream)
+### Lab 8-2
 ```powershell
 cd Lab8-2/ESP32_ADC_Stream
-# คอมไพล์และแฟลชลง ESP32
 idf.py -p COM24 flash monitor
-# เมื่อตรวจสอบเสร็จสิ้น ให้กด Ctrl + ] เพื่อปลดล็อกพอร์ต COM
+# เมื่อดูผลเสร็จ ให้กด Ctrl + ] เพื่อปลดล็อกพอร์ต COM
 ```
 
-### การรัน Lab 8-3 (Hardware Serial Bridge to Web)
+### Lab 8-3
 ```powershell
 cd Lab8-3/Kestrel_Serial_Gateway
 dotnet run
-# เปิดเบราว์เซอร์ที่: http://localhost:5000/api/telemetry
+# เข้าทดสอบที่: http://localhost:5000/api/telemetry
 ```

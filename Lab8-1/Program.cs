@@ -1,6 +1,6 @@
 var builder = WebApplication.CreateBuilder(args);
 var app = builder.Build();
-app.MapGet("/", () => "Welcome to IoT Edge Gateway by [ชนินทร์ คำวงศ์ษา]!");
+app.MapGet("/", () => "Welcome to IoT Edge Gateway by Chanin Khamwongsa (67030281)");
 app.MapGet("/api/status", () => new {
     gateway = "ESP32-EdgeGateway",
     status = "Online",

@@ -1,4 +1,4 @@
-# ใบงานการทดลองที่ 8.1 (Labsheet 8.1) - ฉบับบันทึกผลและตอบคำถาม
+# ใบงานการทดลองที่ 8.1 (Labsheet 8.1)
 ## พื้นฐาน Kestrel Web Server และ Minimal API
 
 **รหัสนักศึกษา:** 67030281  
@@ -49,15 +49,15 @@
 1. ในหน้าจอ Terminal ขณะที่เซิร์ฟเวอร์กำลังรันอยู่ ให้กดปุ่ม `Ctrl + C` เพื่อหยุดโปรแกรม
 2. กลับไปที่หน้าเบราว์เซอร์แล้วกดปุ่ม **Refresh (F5)** สังเกตว่าเกิดอะไรขึ้น และอธิบายสั้นๆ ว่าทำไมจึงเป็นเช่นนั้น
    - **คำตอบ:**  
-     - **สิ่งที่เกิดขึ้น:** บนหน้าจอเว็บเบราว์เซอร์จะแสดงข้อผิดพลาดว่า **"This site can’t be reached" (ERR_CONNECTION_REFUSED)** หรือไม่สามารถเข้าถึงเว็บไซต์ได้
-     - **คำอธิบายสาเหตุ:** เนื่องจาก Kestrel Web Server ทำงานในลักษณะ In-Process Self-Hosted Web Server เมื่อเรากด `Ctrl + C` จะเป็นการส่งสัญญาณ `SIGINT` เพื่อยุติโปรเซส (Process Termination) ของแอปพลิเคชัน ส่งผลให้ TCP Socket Listener ที่คอยเปิดพอร์ตดักรับ HTTP Request (เช่น พอร์ต 5000) ถูกปิดตัวลง เมื่อเบราว์เซอร์ส่ง HTTP GET Request ไปยัง `localhost:5000` จึงไม่มีโปรแกรมใดรับการเชื่อมต่อ ระบบปฏิบัติการจึงปฏิเสธการเชื่อมต่อกลับมาทันที
+     - **สิ่งที่เกิดขึ้น:** บนหน้าเว็บจะเข้าไม่ได้ แล้วขึ้นข้อความว่า **"This site can’t be reached"** หรือมี error code ว่า **`ERR_CONNECTION_REFUSED`** ครับ
+     - **คำอธิบายสาเหตุ:** เพราะว่า Kestrel มันเป็น In-Process Web Server ที่รันอยู่ในตัวโปรเซสของโปรแกรมเลย พอเรากด `Ctrl + C` ก็คือการสั่งหยุดโปรแกรม ทำให้ตัวเว็บเซิร์ฟเวอร์ปิดตัวลงและพอร์ต 5000 ก็ปิดไปด้วย พอเราไปกด Refresh เบราว์เซอร์มันพยายามส่ง HTTP Request ไปหา `localhost:5000` เหมือนเดิม แต่ตอนนี้ไม่มีโปรแกรมอะไรรอรับอยู่ที่พอร์ตนี้แล้ว ระบบปฏิบัติการก็เลยปฏิเสธการเชื่อมต่อกลับมาครับ
 
 ---
 
 ### กิจกรรมที่ 2: การแก้ไขข้อความทักทายใน Program.cs
 แก้ไขใน `Program.cs` ให้แสดงชื่อของตนเอง:
 ```csharp
-app.MapGet("/", () => "Welcome to IoT Edge Gateway by Chanin Khamwongsa (ชนินทร์ คำวงศ์ษา) - 67030281!");
+app.MapGet("/", () => "Welcome to IoT Edge Gateway by Chanin Khamwongsa (67030281)");
 ```
 เมื่อ Refresh หน้าเว็บ ผลลัพธ์แสดงข้อความต้อนรับพร้อมชื่อและรหัสนักศึกษาอย่างถูกต้อง
 
@@ -82,7 +82,7 @@ app.MapGet("/api/status", () => new {
   "isHealthy": true
 }
 ```
-**ข้อสังเกต:** .NET ทำการ Serialize C# Anonymous Object เป็น JSON String และใส่ Response Header `Content-Type: application/json; charset=utf-8` ให้โดยอัตโนมัติ
+**ข้อสังเกต:** .NET ทำการแปลง (Serialize) Anonymous Object ให้เป็น JSON String พร้อมตั้งค่า Header `Content-Type: application/json; charset=utf-8` ให้อัตโนมัติ
 
 ---
 
@@ -157,40 +157,28 @@ app.MapGet("/api/student", () => Results.Ok(new {
 
 ### ข้อ 1: ในสถาปัตยกรรมของ Kestrel ตัวแปร `builder` ทำหน้าที่อะไร และตัวแปร `app` ทำหน้าที่อะไร
 **คำตอบ:**
-1. **ตัวแปร `builder` (ประเภท `WebApplicationBuilder`):**
-   - ทำหน้าที่ในการกำหนดค่าคอนฟิกูเรชันของระบบ (Application Configuration) เช่น การโหลดการตั้งค่าจาก `appsettings.json`, ตัวแปรสภาพแวดล้อม (Environment Variables) หรือ Command-line Arguments
-   - ทำหน้าที่จัดการและลงทะเบียนบริการ (Services) ต่างๆ ลงใน **Dependency Injection (DI) Container** เช่น `builder.Services.AddSingleton<...>()`, `builder.Services.AddHostedService<...>()`
-   - เตรียมความพร้อมของ Web Host และ Kestrel Server Options ก่อนจะสร้างเป็น Web Application
-2. **ตัวแปร `app` (ประเภท `WebApplication`):**
-   - สร้างขึ้นจากการเรียกคำสั่ง `builder.Build()` ซึ่งถือว่าเป็นการสร้างอินสแตนซ์ของ Web Application ที่ประกอบ DI Container และ Configuration เรียบร้อยแล้ว
-   - ทำหน้าที่กำหนดโครงสร้าง **HTTP Request Processing Pipeline (Middleware)** เช่น การสั่ง `app.UseStaticFiles()`, `app.UseRouting()`
-   - ทำหน้าที่กำหนดเส้นทางคำขอ (Endpoint Routing) เช่น `app.MapGet()`, `app.MapPost()`
-   - ทำหน้าที่เริ่มต้นเปิดพอร์ตและดักรับฟังคำขอเครือข่ายด้วยคำสั่ง `app.Run()`
+- **ตัวแปร `builder` (`WebApplicationBuilder`):** พูดง่ายๆ คือเอาไว้เตรียมของและตั้งค่าคอนฟิกต่างๆ ก่อนเริ่มรันแอปครับ เช่น ดึงค่าคอนฟิกจากไฟล์ `appsettings.json` หรือพวก Environment และใช้ลงทะเบียนพวก Services เข้าไปใน DI Container (เช่น ใส่ `builder.Services.AddSingleton<...>()` หรือ `AddHostedService<...>()`) เพื่อเตรียมไว้ให้ส่วนอื่นเรียกใช้ตอนโปรแกรมทำงานครับ
+- **ตัวแปร `app` (`WebApplication`):** เป็นตัวแอปพลิเคชันที่สร้างเสร็จแล้วหลังจากที่เราสั่ง `builder.Build()` ครับ ตัวนี้จะเอาไว้คุมการทำงานจริง เช่น ตั้งค่า Middleware (อย่างพวก `app.UseStaticFiles()` เพื่อให้เปิดไฟล์หน้าเว็บได้), ใช้แมป Routing ของ API ต่างๆ ว่าถ้าเปิด Path นี้เข้ามาต้องทำอะไรต่อ (`app.MapGet()`, `app.MapPost()`) แล้วสุดท้ายก็ใช้สั่ง `app.Run()` เพื่อเริ่มรันเซิร์ฟเวอร์เปิดพอร์ตรับ Request ครับ
 
 ---
 
 ### ข้อ 2: เปรียบเทียบความสะดวกระหว่างการสร้าง Web Server บน .NET Minimal API กับการรันผ่าน LAMP Stack (Apache + PHP) ว่ามีข้อดีข้อเสียต่างกันอย่างไรในมุมมองของงาน IoT Gateway
 **คำตอบ:**
-
-| หัวข้อเปรียบเทียบ | .NET Minimal API (Kestrel Self-Hosted) | LAMP Stack (Linux, Apache, MySQL, PHP) |
-| :--- | :--- | :--- |
-| **สถาปัตยกรรม (Architecture)** | **Single Binary / In-Process Host:** Kestrel ฝังอยู่ในตัวโปรแกรม ทำงานเป็นโปรเซสเดียวจบ ไม่ต้องพึ่งพา Web Server ภายนอก | **Multi-tier Modular:** ต้องติดตั้งและคอนฟิกแยกกันระหว่าง Apache (Web Server), PHP-FPM/Module, และ MySQL (Database) |
-| **การเชื่อมต่อ Hardware I/O / Serial Port** | **ดีเยี่ยมมาก:** สามารถเปิด Serial Port (`System.IO.Ports`) ค้างไว้ในหน่วยความจำผ่าน `BackgroundService` ได้ตลอดเวลา และแชร์ค่าสู่ API ผ่าน Thread-Safe State ในกระบวนการเดียวกัน | **ทำได้ยากและไม่เหมาะสม:** PHP มีโมเดลการทำงานแบบ Request-Response (Stateless / Shared-Nothing) เมื่อ Request จบ โปรเซส/เธรดจะถูกรีเซ็ต ไม่สามารถถือ Persistent Connection ไปยัง Serial Port ค้างไว้ได้โดยตรง (ต้องเขียน Service ภายนอกมารับแทน) |
-| **ประสิทธิภาพและความเร็ว (Performance)** | **สูงมาก (High Throughput, Low Latency):** รันบน .NET Core Runtime ที่มี Non-blocking Asynchronous I/O กินแรมและ CPU ต่ำมาก เหมาะกับอุปกรณ์ Edge IoT เช่น Raspberry Pi | **ค่อนข้างหนัก:** Apache และ PHP มี Overhead ของการสร้าง Context และแปล Script ในแต่ละ Request ใช้แรมมากกว่า |
-| **การติดตั้งและ Deploy** | **สะดวกมาก:** เพียงก็อปปี้โฟลเดอร์หรือ Single Executable File ไปวาง สามารถสั่งรันได้ทันที (`dotnet run` หรือรันไฟล์ไบนารีเดี่ยว) | **ซับซ้อนกว่า:** ต้องติดตั้ง Apache, PHP Runtime, Extensions, คอนฟิก Virtual Host และโฟลเดอร์ `/var/www/html` |
-| **ข้อจำกัด** | ต้องคอมไพล์โค้ดก่อนรัน เหมาะกับงาน Microservices / IoT Web Gateway | เหมาะสำหรับเว็บไซต์ทั่วไปที่มีเนื้อหาแบบ CMS หรือ Dynamic HTML หน้าเยอะๆ มากกว่างาน Edge I/O |
+- **ฝั่ง .NET Minimal API (Kestrel):**
+  - **ข้อดี:** สะดวกมากตรงที่ตัว Web Server มันฝังมาในโปรแกรมเราเลย (In-Process Self-Hosted) ทำให้เราสามารถเขียน `BackgroundService` เพื่อเปิดพอร์ต Serial ค้างไว้ในหน่วยความจำได้ตลอดเวลา พอมีข้อมูลจาก ESP32 วิ่งเข้ามาทางสาย USB ก็เก็บไว้ในแรม แล้วให้ตัว API ดึงไปส่งให้หน้าเว็บดูได้ทันทีแบบ real-time ไม่ต้องคอยเขียนลงฐานข้อมูลก่อน ทำงานเร็วมาก ไม่กินสเปกเครื่อง เหมาะกับการเอามาทำพวก Edge IoT Gateway ที่สุดครับ
+  - **ข้อเสีย:** ต้องคอมไพล์โค้ดก่อนนำไปรัน และเครื่องปลายทางต้องมี .NET Runtime ติดตั้งอยู่ครับ
+- **ฝั่ง LAMP Stack (Apache + PHP):**
+  - **ข้อดี:** เหมาะสำหรับการทำเว็บไซต์แบบดั้งเดิมหรือพวกเว็บบอร์ด เว็บ CMS ทั่วไปที่มีหน้าเว็บเยอะๆ เพราะติดตั้งง่ายและมีเครื่องมือจัดการฐานข้อมูลพร้อมใช้งานใน Linux ครับ
+  - **ข้อเสีย:** ถ้าเอามาทำเป็น IoT Gateway จะยุ่งยากมากครับ เพราะธรรมชาติของ PHP มันทำงานแบบ Request-Response จบแต่ละครั้งก็เคลียร์หน่วยความจำทิ้ง (Stateless) มันไม่สามารถเปิด Serial Port ค้างไว้ในแรมเพื่อรอรับค่าตลอดเวลาได้ ถ้าจะทำจริงๆ ต้องไปเขียน service ตัวอื่นแยกต่างหากมารับค่าจากบอร์ดลง database แล้วค่อยให้ PHP ไปคิวรีมาตอบอีกที ทำให้ทำงานช้าและกินทรัพยากรเครื่องมากกว่าเยอะครับ
 
 ---
 
 ### ข้อ 3: นักศึกษาคิดว่าการเพิ่ม `/api/` เข้าไปใน route นั้นมีประโยชน์อย่างไรบ้าง ถ้าไม่ใส่จะเกิดปัญหาอะไรบ้าง
 **คำตอบ:**
-**1. ประโยชน์ของการใส่ `/api/`:**
-- **การแยกส่วนความรับผิดชอบ (Separation of Concerns):** ช่วยแบ่งแยกอย่างชัดเจนระหว่าง Endpoint ที่ให้บริการข้อมูลดิบ (Data Service / JSON APIs) กับเส้นทางที่ใช้เสิร์ฟหน้าเว็บหรือทรัพยากรคงที่ (Static Web Assets เช่น HTML, CSS, JS, Images)
-- **การกำหนดค่า Reverse Proxy & Gateway:** ทำให้การตั้งค่าพร็อกซีย้อนกลับ (เช่น Nginx, YARP, Cloudflare Gateway) ทำได้สะดวกมาก โดยสามารถตั้งกฎ (Rule) ได้ง่าย เช่น ถ้าเส้นทางขึ้นต้นด้วย `/api/*` ให้ส่งต่อไปยัง Backend Server หรือ Edge Service ส่วนเส้นทางอื่นให้ดึงจาก Web Cache/CDN
-- **การจัดการความปลอดภัยและ Middleware (Security & Policies):** สามารถเขียน Middleware กรองคำขอเฉพาะกลุ่ม `/api/*` ได้อย่างเป็นระบบ เช่น การตรวจ API Key, การทำ Rate Limiting หรือการกำหนด CORS Policy สำหรับข้อมูล
-- **การรองรับ Versioning ในอนาคต:** สามารถขยายเป็น `/api/v1/telemetry`, `/api/v2/telemetry` ได้ง่ายโดยไม่กระทบโครงสร้างหน้าเว็บ
-
-**2. ปัญหาที่อาจเกิดขึ้นหากไม่ใส่ `/api/`:**
-- **Route Collision (การชนกันของเส้นทาง):** ชื่อของ API อาจไปทับซ้อนกับไฟล์หรือหน้าเพจของเว็บไซต์ เช่น หากตั้ง Endpoint ว่า `/status` หรือ `/led` แล้วในโฟลเดอร์ `wwwroot` มีไฟล์ชื่อ `status.html` หรือโฟลเดอร์ `led` อยู่ Kestrel อาจสับสนว่าจะเสิร์ฟไฟล์สถิตหรือส่งต่อไปยัง API Controller
-- **ความสับสนในการพัฒนาระบบ Single Page Application (SPA):** ในระบบเว็บที่ใช้ Client-side Routing (เช่น React, Vue) การเรียก URL ที่ไม่มี `/api/` นำหน้าอาจทำให้ Web Server ส่งหน้า `index.html` กลับไปแทนที่จะส่งข้อมูล JSON ทำให้แอปพลิเคชันทำงานผิดพลาด
-
+- **ประโยชน์ของการใส่ `/api/`:**
+  1. **แยกแยะง่าย:** ช่วยให้แบ่งแยกชัดเจนตั้งแต่เห็น URL เลยครับว่า เส้นทางไหนเป็นการขอข้อมูลดิบ (พวก JSON API) และเส้นทางไหนคือการขอเปิดไฟล์หน้าเว็บทั่วไป (เช่น HTML, CSS, JavaScript หรือรูปภาพ)
+  2. **คอนฟิก Proxy ง่าย:** เวลาเอาไปต่อหลัง Reverse Proxy (อย่าง Nginx) จะตั้งค่าง่ายมากครับ แค่เขียนกฎบอกว่าถ้า URL ขึ้นต้นด้วย `/api/*` ให้โยนไปหาหลังบ้าน ส่วนถ้าไม่มีก็ให้ไปดึงไฟล์หน้าเว็บปกติ
+  3. **จัดการเรื่องความปลอดภัยสะดวก:** เราสามารถเขียน Middleware กรองเฉพาะกลุ่ม `/api/*` ได้ง่ายขึ้น เช่น การเช็ค API Key, การทำ Rate Limiting หรือการกำหนดสิทธิ์ CORS
+- **ปัญหาถ้าไม่ยอมใส่ `/api/`:**
+  1. **ชื่อ Route ชนกัน (Route Collision):** ชื่อ API อาจจะไปตรงกับชื่อไฟล์หรือโฟลเดอร์หน้าเว็บได้ครับ เช่น ถ้าเรามีหน้าเว็บชื่อ `status.html` หรือมีโฟลเดอร์ `led` อยู่ แล้วเราดันไปตั้ง API ว่า `/status` หรือ `/led` ตัวเซิร์ฟเวอร์มันอาจจะงงว่าจะเปิดไฟล์ให้ดูหรือจะรันคำสั่งของ API
+  2. **ปัญหากับเว็บแบบ SPA:** ในเว็บพวก React หรือ Vue ที่ใช้ Client-side Routing ถ้าไม่มี `/api/` นำหน้า เซิร์ฟเวอร์อาจจะเข้าใจผิดแล้วส่งหน้า `index.html` กลับมาแทนที่จะคืนค่าข้อมูล JSON ทำให้หน้าเว็บเพี้ยนและทำงานต่อไม่ได้ครับ

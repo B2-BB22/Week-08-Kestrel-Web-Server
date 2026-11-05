@@ -2,7 +2,7 @@ using System.IO.Ports;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ลงทะเบียน StateStore เป็น Singleton (มีชิ้นเดียวตลอดอายุโปรแกรม)
+// ลงทะเบียน TelemetryStateStore เป็น Singleton (มี Instance เดียวตลอดการทำงาน)
 builder.Services.AddSingleton<TelemetryStateStore>();
 
 // ลงทะเบียน SerialBridgeWorker เป็น Background Hosted Service
@@ -70,7 +70,7 @@ public class TelemetryStateStore
 }
 
 // ============================================================================
-// 2. BACKGROUND WORKER (คนงานดักฟังข้อมูลจากสาย USB พร้อมโหมดจำลอง)
+// 2. BACKGROUND WORKER (อ่านข้อมูล Serial จาก ESP32 พร้อม Fallback Simulation)
 // ============================================================================
 public class SerialBridgeWorker : BackgroundService
 {
